@@ -1,0 +1,25 @@
+/* Custom Scrollbar - Hidden by default, visible only when scrolling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ff9800;
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Make scrollbar visible only when scrolling */
+html:hover ::-webkit-scrollbar-thumb {
+    opacity: 0;
+}
+
+html:active ::-webkit-scrollbar-thumb,
+html:focus-within ::-webkit-scrollbar-thumb {
+    opacity: 1;
+}
