@@ -31,7 +31,7 @@ const Navbar = () => {
             transition={{ duration: 0.5 }}
           >
             <Typography
-              variant="h5"
+              variant="h4"
               sx={{
                 fontFamily: "'Poppins', sans-serif",
                 fontWeight: "bold",
