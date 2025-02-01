@@ -18,9 +18,9 @@ const Footer = () => {
             <Typography variant="body1" sx={{ fontFamily: "'Poppins', sans-serif" }}>
             © {new Date().getFullYear()} RouteGenie. All Rights Reserved.
             </Typography>
-            <Typography variant="body2" sx={{ fontSize: "0.8rem", opacity: 0.7 }}>
+            {/* <Typography variant="body2" sx={{ fontSize: "0.8rem", opacity: 0.7 }}>
                 Designed for seamless travel experiences.
-            </Typography>
+            </Typography> */}
         </Box>
     );
 };

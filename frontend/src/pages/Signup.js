@@ -8,6 +8,7 @@ const Signup = () => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState({ name: "", email: "", password: "", confirmPassword: "", dob: "", gender: "" });
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleSignup = async (e) => {
         e.preventDefault();
@@ -15,6 +16,7 @@ const Signup = () => {
 
         if (userData.password !== userData.confirmPassword) {
             setError("Passwords do not match");
+            setLoading(false);
             return;
         }
 
@@ -25,6 +27,8 @@ const Signup = () => {
             navigate("/itinerary");
         } catch (err) {
             setError(err.response?.data?.msg || "Error signing up");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -38,18 +42,46 @@ const Signup = () => {
 
                     {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-                    <TextField fullWidth label="Full Name" variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px" }} value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
-                    <TextField fullWidth label="Email" variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px" }} value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
-                    <TextField fullWidth label="Date of Birth" type="date" InputLabelProps={{ shrink: true }} variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px" }} value={userData.dob} onChange={(e) => setUserData({ ...userData, dob: e.target.value })} />
-                    <TextField select fullWidth label="Gender" variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px" }} value={userData.gender} onChange={(e) => setUserData({ ...userData, gender: e.target.value })}>
+                    <TextField fullWidth label="Full Name" variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px",boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)" }} value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
+                    <TextField fullWidth label="Email" variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px",boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)" }} value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
+                    <TextField fullWidth label="Date of Birth" type="date" InputLabelProps={{ shrink: true }} variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px",boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)" }} value={userData.dob} onChange={(e) => setUserData({ ...userData, dob: e.target.value })} />
+                    <TextField select fullWidth label="Gender" variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px",boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)" }} value={userData.gender} onChange={(e) => setUserData({ ...userData, gender: e.target.value })}>
                         <MenuItem value="Male">Male</MenuItem>
                         <MenuItem value="Female">Female</MenuItem>
                         <MenuItem value="Other">Other</MenuItem>
                     </TextField>
-                    <TextField fullWidth label="Password" type="password" variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px" }} value={userData.password} onChange={(e) => setUserData({ ...userData, password: e.target.value })} />
-                    <TextField fullWidth label="Confirm Password" type="password" variant="outlined" sx={{ mb: 4, fontSize: "18px", background: "#fff", borderRadius: "5px" }} value={userData.confirmPassword} onChange={(e) => setUserData({ ...userData, confirmPassword: e.target.value })} />
-                    <Button fullWidth variant="contained" sx={{ backgroundColor: "#ff9800", "&:hover": { backgroundColor: "#ff5722" }, fontWeight: "bold", padding: "16px", fontSize: "18px" }} onClick={handleSignup}>
-                        Sign Up
+                    <TextField 
+                        fullWidth 
+                        label="Password" 
+                        type="password"
+                        variant="outlined" 
+                        sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px",boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)" }} 
+                        value={userData.password} 
+                        onChange={(e) => setUserData({ ...userData, password: e.target.value })}
+                    />
+                    {userData.password && userData.password.length < 8 && (
+                        <Typography 
+                            variant="body2" 
+                            sx={{ mb: 3, color: "red" }}
+                        >
+                            Password must be at least 8 characters
+                        </Typography>
+                    )}
+                    <TextField fullWidth label="Confirm Password" type="password" variant="outlined" sx={{ mb: 3, fontSize: "18px", background: "#fff", borderRadius: "5px",boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)" }} value={userData.confirmPassword} onChange={(e) => setUserData({ ...userData, confirmPassword: e.target.value })} />
+                    <Button 
+                        fullWidth 
+                        variant="contained" 
+                        sx={{ 
+                            backgroundColor: "#ff9800", 
+                            "&:hover": { backgroundColor: "#ff5722" }, 
+                            fontWeight: "bold", 
+                            padding: "16px", 
+                            fontSize: "18px" 
+                        }} 
+                        onClick={handleSignup}
+                        disabled={loading} // Disable button while signing up
+                    >
+                        {loading ? "Signing up..." : "Sign Up"}
                     </Button>
                     <Typography variant="body1" sx={{ mt: 3, fontSize: "18px" }}>
                         Already have an account?{" "}
