@@ -1,4 +1,5 @@
 const axios = require("axios");
+const Itinerary = require("../models/Itinerary");
 
 // Fetch coordinates of the location using OpenStreetMap (Nominatim API)
 async function getCoordinates(location) {
@@ -51,20 +52,42 @@ const generateItinerary = async (req, res) => {
 // ✅ Add CRUD functions for Itineraries
 const getItineraries = async (req, res) => {
     try {
-        // Dummy response for now (replace with DB logic)
-        res.json([{ id: 1, destination: "Paris", startDate: "2025-02-05", endDate: "2025-02-10" }]);
+        const itineraries = await Itinerary.find({ user: req.user.id }).sort({ createdAt: -1 });
+        res.json(itineraries);
     } catch (error) {
-        res.status(500).json({ error: "Failed to fetch itineraries" });
+        res.status(500).json({ message: "Server Error" });
     }
 };
 
 const createItinerary = async (req, res) => {
     try {
-        const { destination, startDate, endDate, numPersons, tripType, budget, travelMode } = req.body;
-        // Dummy response (Replace with actual DB insertion logic)
-        res.status(201).json({ message: "Itinerary created", destination, startDate, endDate });
+        // console.log("Received Itinerary Data:", req.body); // ✅ Debugging line
+
+        const { destination, startDate, endDate, numPersons, tripType, budget } = req.body;
+
+        if (!destination || !startDate || !endDate || !numPersons || !tripType || !budget) {
+            return res.status(400).json({ msg: "All fields are required" });
+        }
+
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ msg: "Unauthorized: User not found" });
+        }
+
+        const itinerary = new Itinerary({
+            user: req.user.id, // ✅ Assign the user ID
+            destination,
+            startDate,
+            endDate,
+            numPersons,
+            tripType,
+            budget,
+        });
+
+        await itinerary.save();
+        res.status(201).json(itinerary);
     } catch (error) {
-        res.status(500).json({ error: "Failed to create itinerary" });
+        console.error("Error saving itinerary:", error);
+        res.status(500).json({ msg: "Server Error", error: error.message });
     }
 };
 
@@ -85,6 +108,7 @@ const deleteItinerary = async (req, res) => {
         res.status(500).json({ error: "Failed to delete itinerary" });
     }
 };
+
 
 // ✅ Ensure all functions are exported properly
 module.exports = {

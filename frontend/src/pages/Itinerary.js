@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import API from "../utils/api";
 import {
-    Box, Typography, Paper, Button, TextField, CircularProgress, MenuItem, Select, Grid, Accordion, AccordionSummary, AccordionDetails, List, ListItem, ListItemText, Divider, FormControl, InputLabel
+    Box, Typography, Paper, Button, TextField, CircularProgress, MenuItem, Select, Grid, List, ListItem, ListItemText, Divider, FormControl, InputLabel
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+// import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -21,6 +21,9 @@ const Itinerary = () => {
     const [budget, setBudget] = useState("");
     const [loading, setLoading] = useState(false);
     const [generatedItinerary, setGeneratedItinerary] = useState(null);
+    const [itineraries, setItineraries] = useState([]);
+    const [successMessage, setSuccessMessage] = useState(null);
+    const [newItineraryId, setNewItineraryId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -32,22 +35,69 @@ const Itinerary = () => {
         if (!destination || !startDate || !endDate || !numPersons || !tripType || !budget) {
             return alert("Please fill all fields.");
         }
+    
         setLoading(true);
         try {
-            const { data } = await API.post("/itineraries/generate-itinerary", {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("No authorization token found!");
+                return;
+            }
+    
+            const itineraryData = {
                 destination,
                 startDate: dayjs(startDate).format("YYYY-MM-DD"),
                 endDate: dayjs(endDate).format("YYYY-MM-DD"),
                 numPersons,
                 tripType,
                 budget
+            };
+    
+            const { data } = await API.post("/itineraries", itineraryData, {
+                headers: { Authorization: `Bearer ${token}` }
             });
-            setGeneratedItinerary(data);
+    
+            // Set success message and itinerary ID
+            setSuccessMessage("Itinerary successfully created!");
+            setNewItineraryId(data._id);
+    
+            setDestination("");
+            setStartDate(null);
+            setEndDate(null);
+            setNumPersons("");
+            setTripType("");
+            setBudget("");
+    
+            fetchSavedItineraries();
+    
+            // Auto-hide the success message after 5 seconds
+            setTimeout(() => {
+                setSuccessMessage(null);
+            }, 5000);
         } catch (error) {
-            console.error("Failed to generate itinerary", error);
+            console.error("Failed to generate itinerary:", error);
+            alert("Error: " + error.response?.data?.msg || "Something went wrong!");
         }
+    
         setLoading(false);
     };
+    
+
+    const fetchSavedItineraries = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const { data } = await API.get("/itineraries", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setItineraries(data);
+        } catch (error) {
+            console.error("Error fetching itineraries", error);
+        }
+    };
+    
+    useEffect(() => {
+        fetchSavedItineraries();
+    }, []);
 
     return (
         <Box sx={{ background: "#f3f4f6", minHeight: "100vh", padding: "50px 10%" }}>
@@ -177,30 +227,152 @@ const Itinerary = () => {
                         </Paper>
                         {/* Message Below Form */}
                         <Box sx={{ textAlign: "center", mt: 5 }}>
-                            <Typography variant="h6" sx={{ color: "#666", fontFamily: "'Poppins', sans-serif", fontSize: "1.5rem" }}>
-                                ✨ Your saved itineraries will be displayed here once added!
-                            </Typography>
+                        {itineraries.length === 0 && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        textAlign: "center",
+                                        color: "#666",
+                                        fontFamily: "'Poppins', sans-serif",
+                                        fontSize: "1.5rem",
+                                        mt: 4,
+                                    }}
+                                >
+                                    ✨ Your saved itineraries will be displayed here once added!
+                                </Typography>
+                            </motion.div>
+                        )}
                         </Box>
                     </motion.div>
-                    {/* Display Generated Itinerary in Collapsible Format */}
-                    {generatedItinerary && (
-                        <Paper sx={{ padding: "30px", background: "#ffffff", borderRadius: "12px", boxShadow: "0px 6px 20px rgba(0, 0, 0, 0.1)", mt: 5 }}>
-                            <Accordion>
-                                <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ fontWeight: "bold", color: "#ff9800", fontSize: "1.2rem" }}>
-                                    📌 {generatedItinerary.destination} ({generatedItinerary.startDate} - {generatedItinerary.endDate})
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    {generatedItinerary.itinerary.map((day, index) => (
-                                        <Paper key={index} sx={{ padding: "20px", background: "#f9f9f9", borderRadius: "8px", mb: 2 }}>
-                                            <Typography variant="h5" sx={{ fontWeight: "bold", fontFamily: "'Raleway', sans-serif" }}>{day.day}</Typography>
-                                            <Typography>🌅 Morning: {day.morning}</Typography>
-                                            <Typography>🍽️ Afternoon: {day.afternoon}</Typography>
-                                            <Typography>🌙 Evening: {day.evening}</Typography>
+                    {successMessage && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Paper
+                                sx={{
+                                    padding: "15px",
+                                    background: "#e8f5e9",
+                                    borderRadius: "10px",
+                                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    mt: 3,
+                                }}
+                            >
+                                <Typography
+                                    variant="h6"
+                                    sx={{ color: "#2e7d32", fontFamily: "'Poppins', sans-serif", fontWeight: "bold" }}
+                                >
+                                    ✅ {successMessage}
+                                </Typography>
+
+                                {/* View Itinerary Button */}
+                                <Button
+                                    variant="contained"
+                                    sx={{
+                                        backgroundColor: "#4caf50",
+                                        fontWeight: "bold",
+                                        padding: "8px 15px",
+                                        textTransform: "none",
+                                        "&:hover": { backgroundColor: "#388e3c" },
+                                    }}
+                                    onClick={() => navigate(`/itinerary/${newItineraryId}`)}
+                                >
+                                    View Itinerary
+                                </Button>
+                            </Paper>
+                        </motion.div>
+                    )}
+                    {/* Display Itineraries if Available */}
+                    {itineraries.length > 0 && (
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }}>
+                            <Paper
+                                sx={{
+                                    padding: "25px",
+                                    background: "#ffffff",
+                                    borderRadius: "12px",
+                                    boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.1)",
+                                    mt: 4,
+                                }}
+                            >
+                                <Typography
+                                    variant="h5"
+                                    sx={{
+                                        fontWeight: "bold",
+                                        textAlign: "center",
+                                        mb: 3,
+                                        fontFamily: "'Raleway', sans-serif",
+                                        color: "#333",
+                                    }}
+                                >
+                                    📌 <span style={{ color: "#e63946" }}>Saved Itineraries</span>
+                                </Typography>
+
+                                {/* Iterate Over Each Itinerary */}
+                                {itineraries.map((itinerary, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                    >
+                                        <Paper
+                                            sx={{
+                                                padding: "15px",
+                                                background: "#f9f9f9",
+                                                borderRadius: "8px",
+                                                mb: 2,
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                transition: "0.3s",
+                                                "&:hover": { transform: "scale(1.02)", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)" },
+                                            }}
+                                        >
+                                            {/* Left Side - Itinerary Text */}
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontFamily: "'Poppins', sans-serif",
+                                                    color: "#1d3557",
+                                                    fontWeight: "bold",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "8px",
+                                                }}
+                                            >
+                                                📍 {itinerary.destination} 
+                                                <span style={{ fontSize: "1rem", color: "#666" }}>
+                                                    ({itinerary.startDate} - {itinerary.endDate})
+                                                </span>
+                                            </Typography>
+
+                                            {/* Right Side - View Details Button */}
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    backgroundColor: "#2a9d8f",
+                                                    fontWeight: "bold",
+                                                    fontSize: "1rem",
+                                                    padding: "8px 15px",
+                                                    textTransform: "none",
+                                                    transition: "transform 0.2s",
+                                                    "&:hover": { backgroundColor: "#ff5722", transform: "scale(1.05)" },
+                                                }}
+                                                onClick={() => navigate(`/itinerary/${itinerary._id}`)}
+                                            >
+                                                View Details
+                                            </Button>
                                         </Paper>
-                                    ))}
-                                </AccordionDetails>
-                            </Accordion>
-                        </Paper>
+                                    </motion.div>
+                                ))}
+                            </Paper>
+                        </motion.div>
                     )}
                 </>
             )}

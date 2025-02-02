@@ -48,10 +48,12 @@ const Navbar = () => {
             <Typography
               variant="h4"
               sx={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Mystery Quest', sans-serif",
+                fontSize: "2.8rem",
                 fontWeight: "bold",
                 color: "#f8f8f8",
-                textShadow: "1px 1px 5px rgba(255, 255, 255, 0.3)"
+                textShadow: "1px 1px 5px rgba(255, 255, 255, 0.3)",
+                "&:hover": { color: "#ff9800" },
               }}
             >
               RouteGenie
