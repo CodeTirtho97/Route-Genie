@@ -1,10 +1,20 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { Box, Button, Typography, Paper } from "@mui/material";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const Home = () => {
-  // Select a random background image on each page load
+  const [user, setUser] = useState(null);
+
+  // ✅ Check if the user is logged in
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // ✅ Select a random background image on each page load
   const randomBg = useMemo(() => {
     const randomNumber = Math.floor(Math.random() * 15) + 1; // Picks a number between 1 and 15
     return require(`../assets/hero-bg-${randomNumber}.jpg`);
@@ -90,39 +100,41 @@ const Home = () => {
             </Button>
           </motion.div>
 
-          {/* Login & Signup Buttons */}
-          <Box sx={{ display: "flex", gap: "15px", mt: 4, justifyContent: "center" }}>
-            <Button
-              variant="outlined"
-              sx={{
-                borderColor: "#ff9800",
-                color: "#ff9800",
-                fontSize: "16px",
-                fontWeight: "bold",
-                padding: "10px 20px",
-                "&:hover": { backgroundColor: "#ff9800", color: "#fff" },
-              }}
-              component={Link}
-              to="/login"
-            >
-              Login
-            </Button>
-            <Button
-              variant="outlined"
-              sx={{
-                borderColor: "#ff9800",
-                color: "#ff9800",
-                fontSize: "16px",
-                fontWeight: "bold",
-                padding: "10px 20px",
-                "&:hover": { backgroundColor: "#ff9800", color: "#fff" },
-              }}
-              component={Link}
-              to="/signup"
-            >
-              Sign Up
-            </Button>
-          </Box>
+          {/* ✅ Show Login & Signup buttons only if user is NOT logged in */}
+          {!user && (
+            <Box sx={{ display: "flex", gap: "15px", mt: 4, justifyContent: "center" }}>
+              <Button
+                variant="outlined"
+                sx={{
+                  borderColor: "#ff9800",
+                  color: "#ff9800",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  padding: "10px 20px",
+                  "&:hover": { backgroundColor: "#ff9800", color: "#fff" },
+                }}
+                component={Link}
+                to="/login"
+              >
+                Login
+              </Button>
+              <Button
+                variant="outlined"
+                sx={{
+                  borderColor: "#ff9800",
+                  color: "#ff9800",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  padding: "10px 20px",
+                  "&:hover": { backgroundColor: "#ff9800", color: "#fff" },
+                }}
+                component={Link}
+                to="/signup"
+              >
+                Sign Up
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
 
