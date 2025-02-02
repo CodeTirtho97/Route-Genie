@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import API from "../utils/api";
 import {
-    Box, Typography, Paper, Button, TextField, CircularProgress, MenuItem, Select, InputLabel, FormControl, Grid
+    Box, Typography, Paper, Button, TextField, CircularProgress, MenuItem, Select, Grid, Accordion, AccordionSummary, AccordionDetails, List, ListItem, ListItemText, Divider, FormControl, InputLabel
 } from "@mui/material";
-import { List, ListItem, ListItemText, Divider } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -12,7 +12,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 const Itinerary = () => {
-    const [itineraries, setItineraries] = useState([]);
     const [user, setUser] = useState(null);
     const [destination, setDestination] = useState("");
     const [startDate, setStartDate] = useState(null);
@@ -20,8 +19,8 @@ const Itinerary = () => {
     const [numPersons, setNumPersons] = useState("");
     const [tripType, setTripType] = useState("");
     const [budget, setBudget] = useState("");
-    const [travelMode, setTravelMode] = useState("");
     const [loading, setLoading] = useState(false);
+    const [generatedItinerary, setGeneratedItinerary] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,39 +28,23 @@ const Itinerary = () => {
         setUser(storedUser);
     }, []);
 
-    useEffect(() => {
-        if (user) {
-            API.get("/itineraries")
-                .then((res) => setItineraries(res.data))
-                .catch(() => setItineraries([]));
-        }
-    }, [user]);
-
-    const handleCreateItinerary = async () => {
-        if (!destination || !startDate || !endDate || !numPersons || !tripType || !budget || !travelMode) {
+    const handleGenerateItinerary = async () => {
+        if (!destination || !startDate || !endDate || !numPersons || !tripType || !budget) {
             return alert("Please fill all fields.");
         }
         setLoading(true);
         try {
-            const { data } = await API.post("/itineraries", {
+            const { data } = await API.post("/itineraries/generate-itinerary", {
                 destination,
                 startDate: dayjs(startDate).format("YYYY-MM-DD"),
                 endDate: dayjs(endDate).format("YYYY-MM-DD"),
                 numPersons,
                 tripType,
-                budget,
-                travelMode
+                budget
             });
-            setItineraries([...itineraries, data]);
-            setDestination("");
-            setStartDate(null);
-            setEndDate(null);
-            setNumPersons("");
-            setTripType("");
-            setBudget("");
-            setTravelMode("");
+            setGeneratedItinerary(data);
         } catch (error) {
-            console.error("Failed to create itinerary", error);
+            console.error("Failed to generate itinerary", error);
         }
         setLoading(false);
     };
@@ -188,25 +171,37 @@ const Itinerary = () => {
                                 </Select>
                             </FormControl>
 
-                            <Button variant="contained" fullWidth sx={{ backgroundColor: "#ff9800", fontWeight: "bold", "&:hover": { backgroundColor: "#ff5722" } }} onClick={handleCreateItinerary}>
-                                {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "CREATE ITINERARY"}
+                            <Button variant="contained" fullWidth sx={{ backgroundColor: "#ff9800", fontWeight: "bold", fontSize: "1.2rem", "&:hover": { backgroundColor: "#ff5722" } }} onClick={handleGenerateItinerary}>
+                                {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "CREATE NEW ITINERARY"}
                             </Button>
-
-                            {/* 📝 Message Below Form */}
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    textAlign: "center",
-                                    mt: 5,
-                                    color: "#666",
-                                    fontFamily: "'Poppins', sans-serif",
-                                    fontSize: "1.5rem",
-                                }}
-                            >
+                        </Paper>
+                        {/* Message Below Form */}
+                        <Box sx={{ textAlign: "center", mt: 5 }}>
+                            <Typography variant="h6" sx={{ color: "#666", fontFamily: "'Poppins', sans-serif", fontSize: "1.5rem" }}>
                                 ✨ Your saved itineraries will be displayed here once added!
                             </Typography>
-                        </Paper>
+                        </Box>
                     </motion.div>
+                    {/* Display Generated Itinerary in Collapsible Format */}
+                    {generatedItinerary && (
+                        <Paper sx={{ padding: "30px", background: "#ffffff", borderRadius: "12px", boxShadow: "0px 6px 20px rgba(0, 0, 0, 0.1)", mt: 5 }}>
+                            <Accordion>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ fontWeight: "bold", color: "#ff9800", fontSize: "1.2rem" }}>
+                                    📌 {generatedItinerary.destination} ({generatedItinerary.startDate} - {generatedItinerary.endDate})
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    {generatedItinerary.itinerary.map((day, index) => (
+                                        <Paper key={index} sx={{ padding: "20px", background: "#f9f9f9", borderRadius: "8px", mb: 2 }}>
+                                            <Typography variant="h5" sx={{ fontWeight: "bold", fontFamily: "'Raleway', sans-serif" }}>{day.day}</Typography>
+                                            <Typography>🌅 Morning: {day.morning}</Typography>
+                                            <Typography>🍽️ Afternoon: {day.afternoon}</Typography>
+                                            <Typography>🌙 Evening: {day.evening}</Typography>
+                                        </Paper>
+                                    ))}
+                                </AccordionDetails>
+                            </Accordion>
+                        </Paper>
+                    )}
                 </>
             )}
         </Box>
