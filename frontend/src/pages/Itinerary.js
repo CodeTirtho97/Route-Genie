@@ -212,12 +212,13 @@ const Itinerary = () => {
 
                             <FormControl fullWidth sx={{ mb: 3 }}>
                                 <InputLabel>Type of Trip</InputLabel>
-                                <Select value={tripType} onChange={(e) => setTripType(e.target.value)}>
-                                    <MenuItem value="Solo">Solo</MenuItem>
-                                    <MenuItem value="Family">Family</MenuItem>
-                                    <MenuItem value="Friends">Friends</MenuItem>
-                                    <MenuItem value="Adventure">Adventure</MenuItem>
-                                    <MenuItem value="Road">Road</MenuItem>
+                                <Select label="Type of Trip" value={tripType} onChange={(e) => setTripType(e.target.value)}>
+                                    <MenuItem sx={{ "&:hover": { backgroundColor: "#83c5be" }}} value="Solo">Solo</MenuItem>
+                                    <MenuItem sx={{ "&:hover": { backgroundColor: "#83c5be" }}} value="Family">Family</MenuItem>
+                                    <MenuItem sx={{ "&:hover": { backgroundColor: "#83c5be" }}} value="Friends">Friends</MenuItem>
+                                    <MenuItem sx={{ "&:hover": { backgroundColor: "#83c5be" }}} value="Adventure">Adventure</MenuItem>
+                                    <MenuItem sx={{ "&:hover": { backgroundColor: "#83c5be" }}} value="Road">Road</MenuItem>
+                                    <MenuItem sx={{ "&:hover": { backgroundColor: "#83c5be" }}} value="Business">Business</MenuItem>
                                 </Select>
                             </FormControl>
 
