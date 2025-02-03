@@ -53,14 +53,23 @@ const Itinerary = () => {
                 budget
             };
     
-            const { data } = await API.post("/itineraries", itineraryData, {
+            // ✅ Generate the itinerary first (to get the `days` array)
+            const generatedResponse = await API.post("/itineraries/generate-itinerary", itineraryData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
     
-            // Set success message and itinerary ID
+            const generatedItinerary = generatedResponse.data;
+    
+            // ✅ Save the full itinerary (including `days`) to the DB
+            const { data } = await API.post("/itineraries", { ...generatedItinerary }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+    
+            // ✅ Show success message and save itinerary ID
             setSuccessMessage("Itinerary successfully created!");
             setNewItineraryId(data._id);
     
+            // ✅ Reset form fields
             setDestination("");
             setStartDate(null);
             setEndDate(null);
@@ -68,9 +77,10 @@ const Itinerary = () => {
             setTripType("");
             setBudget("");
     
+            // ✅ Refresh saved itineraries list
             fetchSavedItineraries();
     
-            // Auto-hide the success message after 5 seconds
+            // ✅ Auto-hide the success message after 5 seconds
             setTimeout(() => {
                 setSuccessMessage(null);
             }, 5000);
@@ -81,6 +91,7 @@ const Itinerary = () => {
     
         setLoading(false);
     };
+    
     
 
     const fetchSavedItineraries = async () => {
@@ -193,10 +204,20 @@ const Itinerary = () => {
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <Grid container spacing={2} sx={{ mb: 3 }}>
                                     <Grid item xs={6}>
-                                        <DatePicker fullWidth label="Start Date" value={startDate} onChange={(date) => setStartDate(date)} renderInput={(params) => <TextField {...params} fullWidth variant="outlined" />} />
+                                    <DatePicker
+                                        label="Start Date"
+                                        value={startDate}
+                                        onChange={(date) => setStartDate(date)}
+                                        slotProps={{ textField: { variant: "outlined", fullWidth: true } }}
+                                    />
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <DatePicker fullWidth label="End Date" value={endDate} onChange={(date) => setEndDate(date)} renderInput={(params) => <TextField {...params} fullWidth variant="outlined" />} />
+                                    <DatePicker
+                                        label="End Date"
+                                        value={endDate}
+                                        onChange={(date) => setEndDate(date)}
+                                        slotProps={{ textField: { variant: "outlined", fullWidth: true } }}
+                                    />
                                     </Grid>
                                 </Grid>
                             </LocalizationProvider>

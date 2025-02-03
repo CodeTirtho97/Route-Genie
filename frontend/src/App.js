@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Itinerary from "./pages/Itinerary";
+import ItineraryDetails from "./pages/ItineraryDetails";
 import Bookings from "./pages/Bookings";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/itinerary" element={<Itinerary />} />
+        <Route path="/itinerary/:itineraryId" element={<ItineraryDetails />} />
         <Route path="/bookings" element={<Bookings />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

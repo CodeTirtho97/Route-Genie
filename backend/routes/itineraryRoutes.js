@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const {
     getItineraries,
+    getItineraryById,
     createItinerary,
     updateItinerary,
     deleteItinerary,
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // Existing CRUD operations
 router.get("/", protect, getItineraries);
+router.get("/:id", protect, getItineraryById);
 router.post(
     "/",
     protect,
