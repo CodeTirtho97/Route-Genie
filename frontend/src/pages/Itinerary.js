@@ -243,7 +243,7 @@ const Itinerary = () => {
                                 </Select>
                             </FormControl>
 
-                            <Button variant="contained" fullWidth sx={{ backgroundColor: "#ff9800", fontWeight: "bold", fontSize: "1.2rem", "&:hover": { backgroundColor: "#ff5722" } }} onClick={handleGenerateItinerary}>
+                            <Button variant="contained" fullWidth sx={{ backgroundColor: "# ", fontWeight: "bold", fontSize: "1.2rem", "&:hover": { backgroundColor: "#ff5722" } }} onClick={handleGenerateItinerary}>
                                 {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "CREATE NEW ITINERARY"}
                             </Button>
                         </Paper>

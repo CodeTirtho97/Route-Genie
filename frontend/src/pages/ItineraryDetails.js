@@ -4,6 +4,7 @@ import API from "../utils/api";
 import {
     Box, Typography, Paper, Button, CircularProgress, List, ListItem, ListItemText, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, MenuItem
 } from "@mui/material";
+import dayjs from "dayjs";
 import { motion } from "framer-motion";
 
 const ItineraryDetails = () => {
@@ -18,6 +19,8 @@ const ItineraryDetails = () => {
     const [deleteMessage, setDeleteMessage] = useState(null);
     const [redirectSeconds, setRedirectSeconds] = useState(5);
     const [updateSuccessMessage, setUpdateSuccessMessage] = useState(null);
+    const [openAddBookingDialog, setOpenAddBookingDialog] = useState(false);
+    const [openBookingErrorDialog, setOpenBookingErrorDialog] = useState(false);
 
     // Editable fields for update
     const [numPersons, setNumPersons] = useState("");
@@ -116,6 +119,20 @@ const ItineraryDetails = () => {
         }
     };
 
+    // Function to handle showing booking details
+    const handleShowBookings = () => {
+        if (bookings.length === 0) {
+            setOpenBookingErrorDialog(true); // Show error modal if no bookings exist
+        } else {
+            navigate(`/bookings/details/${itineraryId}`);
+        }
+    };
+
+    // Function to handle opening Add Booking dialog
+    const handleAddBooking = () => {
+        setOpenAddBookingDialog(true);
+    };
+
 
     if (loading) {
         return (
@@ -149,13 +166,50 @@ const ItineraryDetails = () => {
                 </Typography>
             )}
 
-            <Paper sx={{ padding: "20px", borderRadius: "12px", boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.1)" }}>
-                <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2, fontFamily: "'Poppins', sans-serif" }}>
-                    📅 Trip Duration: {itinerary.startDate} to {itinerary.endDate}
-                </Typography>
-                <Typography variant="h6" sx={{ fontWeight: "bold", fontFamily: "'Poppins', sans-serif", color: "#555" }}>
-                    👥 Travelers: {itinerary.numPersons} | 🎒 Type: {itinerary.tripType} | 💰 Budget: ₹{itinerary.budget}
-                </Typography>
+            <Paper 
+                sx={{ 
+                    padding: "20px", 
+                    borderRadius: "12px", 
+                    boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.1)", 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    alignItems: "center"
+                }}
+>
+                <Box>
+                    <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2, fontFamily: "'Poppins', sans-serif" }}>
+                        📅 Trip Duration: {itinerary.startDate} to {itinerary.endDate}
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontWeight: "bold", fontFamily: "'Poppins', sans-serif", color: "#555" }}>
+                        👥 Travelers: {itinerary.numPersons} | 🎒 Type: {itinerary.tripType} | 💰 Budget: ₹{itinerary.budget}
+                    </Typography>
+                </Box>
+
+                {/* Right-aligned button */}
+                <Button
+                    variant="outlined"
+                    onClick={handleShowBookings}
+                    sx={{
+                        whiteSpace: "nowrap",
+                        fontSize: "1.2rem",
+                        fontWeight: "bold",
+                        borderWidth: "2px",
+                        borderColor: "#2a9d8f",
+                        color: "#2a9d8f",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        textTransform: "none",
+                        transition: "all 0.5s ease-in-out",
+                        "&:hover": {
+                            backgroundColor: "#2a9d8f",
+                            color: "#fff",
+                            // boxShadow: "0px 4px 10px rgba(42, 157, 143, 0.5)",
+                            transform: "scale(1.05)",
+                        },
+                    }}
+                >
+                    Show Booking Details 👀
+                </Button>
             </Paper>
 
             {/* Day-Wise Itinerary with Bookings */}
@@ -166,30 +220,77 @@ const ItineraryDetails = () => {
 
                 {itinerary.days && itinerary.days.length > 0 ? (
                     <List>
-                        {itinerary.days.map((day, index) => (
-                            <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
-                                <ListItem>
-                                    <ListItemText
-                                        primary={<Typography variant="h6" sx={{ fontWeight: "bold", color: "#444" }}>📅 {day.title}</Typography>}
-                                        secondary={<Typography sx={{ fontFamily: "'Poppins', sans-serif", color: "#666" }}>{day.activities.join(", ")}</Typography>}
-                                    />
-                                </ListItem>
+                        {itinerary.days.map((day, index) => {
+                            // Calculate date for this day
+                            const dayDate = dayjs(itinerary.startDate).add(index, "day").format("YYYY-MM-DD");
 
-                                {/* Show Bookings for this Day */}
-                                {bookings
-                                    .filter(booking => booking.day === index + 1)
-                                    .map((booking, bIndex) => (
-                                        <ListItem key={bIndex} sx={{ pl: 4 }}>
-                                            <ListItemText
-                                                primary={<Typography sx={{ fontWeight: "bold", color: "#388e3c" }}>✅ {booking.activity}</Typography>}
-                                                secondary={`⏰ Time: ${booking.time} | 💰 Price: ₹${booking.price}`}
-                                            />
-                                        </ListItem>
-                                    ))}
+                            return (
+                                <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
+                                    <ListItem
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            padding: "15px",
+                                            backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#fff",
+                                            borderRadius: "10px",
+                                            boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
+                                            marginBottom: "10px",
+                                        }}
+                                    >
+                                        {/* Left: Day Activities */}
+                                        <Box sx={{ flex: 1 }}>
+                                            <Typography variant="h6" sx={{ fontWeight: "bold", color: "#444", fontFamily: "'Raleway', sans-serif" }}>
+                                                📅 Day {index + 1}
+                                            </Typography>
+                                            <Typography sx={{ fontFamily: "'Poppins', sans-serif", color: "#666" }}>
+                                                {day.activities.join(", ")}
+                                            </Typography>
+                                        </Box>
 
-                                <Divider />
-                            </motion.div>
-                        ))}
+                                        {/* Right: Booking Details */}
+                                        <Box sx={{ flex: 1, textAlign: "right" }}>
+                                            {bookings
+                                                .filter((booking) => dayjs(booking.date).isSame(dayDate, "day"))
+                                                .map((booking, bIndex) => {
+                                                    // Define color coding for booking categories
+                                                    const categoryColors = {
+                                                        Flight: "#bd632f",
+                                                        Train: "#0277bd",
+                                                        Hotel: "#4caf50",
+                                                        Restaurant: "#d32f2f",
+                                                        Activity: "#8e24aa",
+                                                    };
+
+                                                    return (
+                                                        <Paper
+                                                            key={bIndex}
+                                                            sx={{
+                                                                display: "inline-block",
+                                                                padding: "10px 15px",
+                                                                borderRadius: "8px",
+                                                                boxShadow: "0px 2px 10px rgba(0,0,0,0.1)",
+                                                                backgroundColor: categoryColors[booking.category] || "#616161",
+                                                                color: "#fff",
+                                                                textAlign: "right",
+                                                                fontFamily: "'Poppins', sans-serif",
+                                                                marginLeft: "10px",
+                                                            }}
+                                                        >
+                                                            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                                                                {booking.name}
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {booking.category} | {dayjs(booking.date).format("DD MMM, YYYY")} {booking.time ? `| ${booking.time}` : ""}
+                                                            </Typography>
+                                                        </Paper>
+                                                    );
+                                                })}
+                                        </Box>
+                                    </ListItem>
+                                </motion.div>
+                            );
+                        })}
                     </List>
                 ) : (
                     <Typography sx={{ fontFamily: "'Poppins', sans-serif", color: "gray", textAlign: "center" }}>
@@ -203,7 +304,7 @@ const ItineraryDetails = () => {
                 <Button
                     variant="contained"
                     sx={{ backgroundColor: "#ffa726", fontWeight: "bold", fontSize: "1.5rem", "&:hover": { backgroundColor: "#ff8000" } }}
-                    onClick={() => navigate(`/bookings/new?itineraryId=${itineraryId}`)}
+                    onClick={handleAddBooking}
                 >
                     ➕ Add Booking
                 </Button>
@@ -211,11 +312,11 @@ const ItineraryDetails = () => {
 
             {/* Buttons Section */}
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-                <Button variant="contained" sx={{ backgroundColor: "#1976d2", fontWeight: "bold", "&:hover": { backgroundColor: "#1257a3" } }} onClick={() => setOpenUpdateDialog(true)}>
+                <Button variant="contained" sx={{ backgroundColor: "#013a63", fontWeight: "bold", fontSize: "1.1rem", "&:hover": { backgroundColor: "#61a5c2" } }} onClick={() => setOpenUpdateDialog(true)}>
                     ✏️ Update Itinerary
                 </Button>
 
-                <Button variant="contained" sx={{ backgroundColor: "#d32f2f", fontWeight: "bold", "&:hover": { backgroundColor: "#b71c1c" } }} onClick={() => setOpenDeleteDialog(true)}>
+                <Button variant="contained" sx={{ backgroundColor: "#590d22", fontWeight: "bold", fontSize: "1.1rem", "&:hover": { backgroundColor: "#c9184a" } }} onClick={() => setOpenDeleteDialog(true)}>
                     ❌ Delete Itinerary
                 </Button>
             </Box>
@@ -252,8 +353,42 @@ const ItineraryDetails = () => {
                     </TextField>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="outlined" sx={{ borderColor: "#c1121f", fontWeight: "bold", "&:hover": { backgroundColor: "#ee6055", color: "#fff" } }}onClick={() => setOpenUpdateDialog(false)} color="error">Cancel</Button>
+                    <Button variant="outlined" sx={{ borderColor: "#c1121f", fontWeight: "bold", "&:hover": { backgroundColor: "#ee6055", color: "#fff" } }} onClick={() => setOpenUpdateDialog(false)} color="error">Cancel</Button>
                     <Button variant="outlined" sx={{ borderColor: "#588157", fontWeight: "bold", "&:hover": { backgroundColor: "#52b788", color: "#fff" } }} onClick={handleUpdateItinerary} color="success">Save Changes</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Dialog for "Add Booking" options */}
+            <Dialog open={openAddBookingDialog} onClose={() => setOpenAddBookingDialog(false)}>
+                <DialogTitle variant="h5" >➕ Add a Booking</DialogTitle>
+                <DialogContent>
+                    <DialogContentText sx={{ fontSize: "1.1rem" }}>
+                        Do you already have a booking, or would you like us to suggest options for you?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <Button variant="outlined" sx={{ borderColor: "#003049", fontWeight: "bold", "&:hover": { backgroundColor: "#669bbc", color: "#fff" } }} onClick={() => navigate(`/bookings/existing/${itineraryId}`)} color="primary">
+                        Enter Existing Booking
+                    </Button>
+                    <Button variant="outlined" sx={{ borderColor: "#3c096c", fontWeight: "bold", "&:hover": { backgroundColor: "#957fef", color: "#fff" } }} onClick={() => navigate(`/bookings/new/${itineraryId}`)} color="secondary">
+                        Find a Booking
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Dialog for No Active Bookings Error */}
+            <Dialog open={openBookingErrorDialog} onClose={() => setOpenBookingErrorDialog(false)}>
+                <DialogTitle>No Active Bookings Found</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        There are no active bookings for this trip. Please add a booking to view details.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    {/* <Button onClick={() => setOpenBookingErrorDialog(false)} color="primary">
+                        Okay
+                    </Button> */}
+                    <Button variant="outlined" sx={{ borderColor: "#c1121f", fontWeight: "bold", "&:hover": { backgroundColor: "#ee6055", color: "#fff" } }}onClick={() => setOpenBookingErrorDialog(false)} color="error">Okay</Button>
                 </DialogActions>
             </Dialog>
         </Box>

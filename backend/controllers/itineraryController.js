@@ -1,5 +1,5 @@
 const axios = require("axios");
-const asyncHandler = require("express-async-handler"); // ✅ Added missing import
+const asyncHandler = require("express-async-handler");
 const Itinerary = require("../models/Itinerary");
 
 // Fetch coordinates of the location using OpenStreetMap (Nominatim API)
@@ -19,19 +19,19 @@ async function fetchPlaces(latitude, longitude, category) {
     return response.data.elements.map(place => place.tags.name).filter(name => name);
 }
 
-// ✅ Controller Function to Generate Itinerary
+// Controller Function to Generate Itinerary
 const generateItinerary = async (req, res) => {
     try {
         const { destination, startDate, endDate, numPersons, tripType, budget } = req.body;
         const coords = await getCoordinates(destination);
         if (!coords) return res.status(400).json({ error: "Invalid location" });
 
-        // ✅ Fetch categorized places
+        // Fetch categorized places
         const attractions = await fetchPlaces(coords.lat, coords.lon, "attraction");
         const hotels = await fetchPlaces(coords.lat, coords.lon, "hotel");
         const restaurants = await fetchPlaces(coords.lat, coords.lon, "restaurant");
 
-        // ✅ Create a structured itinerary (with `days`)
+        // Create a structured itinerary (with `days`)
         const itineraryDays = [];
         const totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
 
@@ -53,14 +53,14 @@ const generateItinerary = async (req, res) => {
             numPersons,
             tripType,
             budget,
-            days: itineraryDays  // ✅ Include generated `days`
+            days: itineraryDays  // Include generated `days`
         });
     } catch (error) {
         res.status(500).json({ error: "Failed to generate itinerary" });
     }
 };
 
-// ✅ Fetch all itineraries for a user
+// Fetch all itineraries for a user
 const getItineraries = asyncHandler(async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
@@ -75,7 +75,7 @@ const getItineraries = asyncHandler(async (req, res) => {
     }
 });
 
-// ✅ Fetch a single itinerary by ID
+// Fetch a single itinerary by ID
 const getItineraryById = asyncHandler(async (req, res) => {
     try {
         const itinerary = await Itinerary.findById(req.params.id);
@@ -88,7 +88,7 @@ const getItineraryById = asyncHandler(async (req, res) => {
             return res.status(403).json({ error: "Not authorized to access this itinerary" });
         }
 
-        // ✅ Ensure `days` is included
+        // Ensure `days` is included
         res.json({ ...itinerary.toObject(), days: itinerary.days || [] });
     } catch (error) {
         console.error("Error fetching itinerary:", error);
@@ -96,10 +96,10 @@ const getItineraryById = asyncHandler(async (req, res) => {
     }
 });
 
-// ✅ Create a new itinerary (without auto-generated plan)
+// Create a new itinerary (without auto-generated plan)
 const createItinerary = async (req, res) => {
     try {
-        console.log("Received Itinerary Data:", req.body); // Debugging line
+        // console.log("Received Itinerary Data:", req.body); // Debugging line
 
         const { destination, startDate, endDate, numPersons, tripType, budget, days } = req.body;
 
@@ -111,7 +111,7 @@ const createItinerary = async (req, res) => {
             return res.status(401).json({ msg: "Unauthorized: User not found" });
         }
 
-        // ✅ Check if itinerary already exists (for the same user, destination, and date)
+        // Check if itinerary already exists (for the same user, destination, and date)
         const existingItinerary = await Itinerary.findOne({
             user: req.user.id,
             destination,
@@ -123,12 +123,12 @@ const createItinerary = async (req, res) => {
             return res.status(400).json({ msg: "An itinerary for this destination and date already exists!" });
         }
 
-        // ✅ Ensure `days` are present before saving
+        // Ensure `days` are present before saving
         if (!days || days.length === 0) {
             return res.status(400).json({ msg: "Itinerary must include a day-wise plan" });
         }
 
-        // ✅ Save itinerary with `days`
+        // Save itinerary with `days`
         const itinerary = new Itinerary({
             user: req.user.id,
             destination,
@@ -137,11 +137,11 @@ const createItinerary = async (req, res) => {
             numPersons,
             tripType,
             budget,
-            days  // ✅ Store `days`
+            days  // Store `days`
         });
 
         await itinerary.save();
-        console.log("✅ Itinerary successfully saved to MongoDB:", itinerary); // Debugging line
+        // console.log("Itinerary successfully saved to MongoDB:", itinerary); // Debugging line
 
         res.status(201).json(itinerary);
     } catch (error) {
