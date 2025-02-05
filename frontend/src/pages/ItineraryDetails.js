@@ -21,6 +21,7 @@ const ItineraryDetails = () => {
     const [updateSuccessMessage, setUpdateSuccessMessage] = useState(null);
     const [openAddBookingDialog, setOpenAddBookingDialog] = useState(false);
     const [openBookingErrorDialog, setOpenBookingErrorDialog] = useState(false);
+    const [backgroundImage, setBackgroundImage] = useState("");
 
     // Editable fields for update
     const [numPersons, setNumPersons] = useState("");
@@ -49,6 +50,7 @@ const ItineraryDetails = () => {
                 });
 
                 setItinerary(data);
+                fetchBackgroundImage(data.destination);
             } catch (error) {
                 console.error("Error fetching itinerary details:", error);
                 setError("Itinerary not found!");
@@ -133,6 +135,34 @@ const ItineraryDetails = () => {
         setOpenAddBookingDialog(true);
     };
 
+    // ✅ Fetch Background Image from Unsplash API
+    const fetchBackgroundImage = async (destination) => {
+        try {
+            const apiKey = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
+            const apiUrl = process.env.REACT_APP_UNSPLASH_API_URL;
+
+            //console.log("Unsplash API URL:", process.env.REACT_APP_UNSPLASH_API_URL);
+            //console.log("Unsplash API Key:", process.env.REACT_APP_UNSPLASH_ACCESS_KEY);
+
+            if (!apiKey || !apiUrl) {
+                console.error("Unsplash API Key or URL is missing in .env file!");
+                return;
+            }
+
+            // 🔹 Use the itinerary's `destination` value in the search query
+            const response = await fetch(`${apiUrl}?query=${destination}&client_id=${apiKey}&per_page=1`);
+            const result = await response.json();
+
+            if (result.results && result.results.length > 0) {
+                setBackgroundImage(result.results[0].urls.regular);
+            } else {
+                console.warn(`No images found for "${destination}".`);
+            }
+        } catch (error) {
+            console.error("Error fetching background image:", error);
+        }
+    };
+
 
     if (loading) {
         return (
@@ -153,7 +183,17 @@ const ItineraryDetails = () => {
     }
 
     return (
-        <Box sx={{ padding: "50px 10%" }}>
+        <Box sx={{
+            minHeight: "100vh",
+            background: backgroundImage
+                ? `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), url(${backgroundImage})`
+                : "#f4f4f4",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            color: "white",
+            padding: "50px 10%",
+        }}>
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                 <Typography variant="h3" sx={{ fontWeight: "bold", textAlign: "center", mb: 4, fontFamily: "'Raleway', sans-serif", color: "#ff5722" }}>
                     ✈️ {itinerary.destination} Trip

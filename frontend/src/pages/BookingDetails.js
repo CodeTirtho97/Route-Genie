@@ -39,9 +39,12 @@ const BookingDetails = () => {
                 const { data } = await API.get(`/bookings?itineraryId=${itineraryId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-
+    
+                // ✅ Extra safeguard: Filter bookings that match the itineraryId
+                const filteredData = data.filter(booking => booking.itinerary === itineraryId);
+    
                 // ✅ Correctly format date & time
-                const formattedBookings = data.map(booking => ({
+                const formattedBookings = filteredData.map(booking => ({
                     ...booking,
                     formattedDate: dayjs(booking.date).isValid()
                         ? dayjs(booking.date).format("DD MMM YYYY")
@@ -50,17 +53,17 @@ const BookingDetails = () => {
                         ? dayjs(`${booking.date.split("T")[0]}T${booking.time}`).format("hh:mm A")
                         : "No Time Set"
                 }));
-
+    
                 setBookings(formattedBookings);
                 setFilteredBookings(formattedBookings);
-
+    
                 setTotalSpent(formattedBookings.reduce((sum, booking) => sum + (booking.price || 0), 0));
-
+    
             } catch (error) {
                 console.error("Error fetching bookings:", error);
             }
         };
-
+    
         fetchBookings();
     }, [itineraryId]);
 
@@ -265,7 +268,7 @@ const BookingDetails = () => {
                     sx={{ fontWeight: "bold", color: "#1976d2", fontSize: "1.2rem", borderColor: "#023e8a", borderRadius: "8px", "&:hover": { backgroundColor: "#1976d2", color: "#fff" } }}
                     onClick={() => navigate(`/itinerary/${itineraryId}`)}
                 >
-                    ⬅️ Back to Itinerary
+                    ⬅️ Go to Itinerary Details
                 </Button>
 
                 <Typography variant="h6" sx={{ fontWeight: "bold", color: "#2a9d8f" }}>

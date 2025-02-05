@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -10,9 +10,14 @@ import BookingDetails from "./pages/BookingDetails";
 import ManualBookingForm from "./pages/ManualBookingForm";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-
+import { AuthContext } from "./context/AuthContext"; // ✅ Import AuthContext
+import useAutoLogout from "./hooks/useAutoLogout"; // ✅ Import Auto Logout Hook
 
 function App() {
+  const { logout } = useContext(AuthContext); // ✅ Get logout function from AuthContext
+
+  useAutoLogout(logout); // ✅ Enable Auto Logout on inactivity
+
   return (
     <Router>
       <Navbar />
@@ -28,7 +33,7 @@ function App() {
       </Routes>
       <Footer />
     </Router>
-  )
+  );
 }
 
 export default App;
