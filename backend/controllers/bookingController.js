@@ -66,21 +66,21 @@ const createManualBooking = async (req, res) => {
 const deleteBooking = async (req, res) => {
     try {
         const booking = await Booking.findById(req.params.id);
-        
+
         if (!booking) {
             return res.status(404).json({ msg: "Booking not found" });
         }
 
-        // Check if the booking belongs to the logged-in user
-        if (booking.user.toString() !== req.user) {
-            return res.status(401).json({ msg: "Not authorized" });
+        // Ensure the user deleting the booking is the same user who created it
+        if (booking.user.toString() !== req.userId) {
+            return res.status(403).json({ msg: "Not authorized to delete this booking" });
         }
 
-        await booking.deleteOne(); // Use deleteOne() instead of remove()
+        await booking.deleteOne();
         res.json({ msg: "Booking deleted successfully" });
 
     } catch (error) {
-        console.error(error);
+        console.error("Delete Error:", error);
         res.status(500).json({ msg: "Server error: Unable to delete booking" });
     }
 };
@@ -91,30 +91,40 @@ const deleteBooking = async (req, res) => {
 // @access Private
 const updateBooking = async (req, res) => {
     try {
+        console.log("🔹 Incoming Request to Update Booking");
+        console.log("🔹 Authenticated User:", req.user); // Log the authenticated user
+        console.log("🔹 Booking ID:", req.params.id);
+        console.log("🔹 Request Body:", req.body);
+
         const booking = await Booking.findById(req.params.id);
 
         if (!booking) {
             return res.status(404).json({ msg: "Booking not found" });
         }
 
-        // Check if the booking belongs to the logged-in user
-        if (booking.user.toString() !== req.user) {
+        console.log("🔹 Booking Found:", booking);
+
+        // ✅ Convert req.user to an ObjectId for proper comparison
+        if (booking.user.toString() !== req.userId) {
+            console.error("❌ Not Authorized - User Mismatch");
             return res.status(401).json({ msg: "Not authorized" });
         }
 
-        // Update the booking fields
+        //console.log("✅ User is authorized. Updating booking...");
+
         const updatedBooking = await Booking.findByIdAndUpdate(
             req.params.id,
-            { $set: req.body }, // Update with new data
-            { new: true } // Return updated booking
+            { $set: req.body },
+            { new: true }
         );
 
         res.json(updatedBooking);
     } catch (error) {
-        console.error(error);
+        console.error("❌ Server Error Updating Booking:", error);
         res.status(500).json({ msg: "Server error: Unable to update booking" });
     }
 };
+
 
 module.exports = { 
     createManualBooking,
