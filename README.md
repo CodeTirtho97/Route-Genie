@@ -1,70 +1,172 @@
-# Getting Started with Create React App
+# RouteGenie – Your Personal Travel Assistant
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![image](https://github.com/user-attachments/assets/ad58cc70-f30b-4fd5-a563-66da828d4fcb)
 
-## Available Scripts
 
-In the project directory, you can run:
+## 🛠 Project Overview
 
-### `npm start`
+RouteGenie is a full-stack MERN (MongoDB, Express, React, Node.js) web application that helps users plan, manage, and book their travel itineraries. It includes features like itinerary creation, bookings (flights, hotels, activities), real-time travel data fetching from APIs, and a user authentication system.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+  ### 🏡 Home Page
 
-### `npm test`
+    - Displays an attractive hero section with random background images.
+    - Shows a detailed feature list for itinerary planning, bookings, and travel management.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  ### 📌 Itinerary Management
 
-### `npm run build`
+    - Users can create, edit, and delete itineraries.
+    - Itineraries contain destination, start & end date, trip type (solo/family), budget, and planned activities.
+    - Each itinerary page dynamically fetches background images based on the destination from Unsplash API.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  ### 🛫 Booking System
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    - Users can manually add existing bookings (flights, hotels, restaurants, activities).
+    - Upcoming & past bookings are categorized with filters, sorting, and detailed views.    
+    - Future upgrades will allow real-time booking suggestions.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  ### 🔑 User Authentication & Auto Logout
 
-### `npm run eject`
+    - Users can sign up, log in, and log out.
+    - JWT-based authentication with secure password hashing (bcrypt).
+    - Auto logout after 30 minutes of inactivity.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  ### 📊 Filtering & Sorting
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    - Sort bookings by itinerary name, date, and type.  
+    - Filter bookings by type (Flight, Hotel, Activity, etc.) & date range.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+  ### 🌍 Real-Time Travel Data
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+    - Background images fetched dynamically from Unsplash API.
+    - Flight & hotel data fetching (Future upgrade).
 
-## Learn More
+  ### 🛠 Tech Stack
+  ### Frontend
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  <b><i>React.js</i></b> – UI & component-based structure
+  
+  <b><i>Material-UI</i></b> – UI components
+  
+  <b><i>React Router</i></b> – Page navigation
+  
+  <b><i>Framer Motion</i></b> – Animations
+  
+  <b><i>Day.js</i></b> – Date formatting
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  ### Backend
 
-### Code Splitting
+  <b><i>Node.js & Express.js</i></b> – Server-side logic
+  
+  <b><i>MongoDB (Mongoose)</i></b> – NoSQL database
+  
+  <b><i>JWT Authentication</i></b> – Secure token-based auth
+  
+  <b><i>Bcrypt</i></b> – Password encryption
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+  ### APIs & Integrations
 
-### Analyzing the Bundle Size
+  <b><i>Unsplash API</i></b> – Fetch background images
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+    // AviationStack API – Fetch flight data (Future upgrade)
+    // Amadeus API – Fetch hotel data (Future upgrade)
+    // Ticketmaster API – Fetch activity/event data (Future upgrade)
 
-### Making a Progressive Web App
+  ### 🔧 Installation & Setup
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+  #### 1️⃣ Clone the Repository
 
-### Advanced Configuration
+    $ git clone https://github.com/CodeTirtho97/routegenie.git
+    $ cd routegenie
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+  #### 2️⃣ Backend Setup
 
-### Deployment
+  ##### 📌 Install Dependencies
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+    $ cd backend
+    $ npm install
 
-### `npm run build` fails to minify
+  ##### 📌 Configure Environment Variables
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    Create a .env file inside the backend/ folder and add:
+    
+    PORT=your_backend_URL_port_no
+    MONGO_URI=your_mongodb_connection_string
+    JWT_SECRET=your_jwt_secret_key
+
+  ##### 📌 Run Backend Server
+
+    $ npm start
+
+  #### 3️⃣ Frontend Setup
+
+  ##### 📌 Install Dependencies
+
+    $ cd ../frontend
+    $ npm install
+
+  ##### 📌 Configure Environment Variables
+
+    Create a .env file inside the frontend/ folder and add:
+    
+    REACT_APP_BACKEND_URL=your_backend_URL_site
+    REACT_APP_UNSPLASH_ACCESS_KEY=your_unsplash_api_key
+
+  ##### 📌 Run Frontend Server
+
+    $ npm start
+
+  ### 🔥 Deployment
+
+  #### Backend Deployment (Render/Heroku/Vercel)
+
+    $ git init
+    $ git add .
+    $ git commit -m "Initial commit"
+    $ heroku create routegenie-backend
+    $ git push heroku main
+    
+    Set up environment variables in Heroku/Render settings.
+
+  #### Frontend Deployment (Vercel/Netlify)
+
+    $ npm run build
+    $ netlify deploy
+    
+    Set REACT_APP_BACKEND_URL in Netlify environment settings.
+
+  ### 📂 Folder Structure
+
+    routegenie/
+    │── backend/
+    │   ├── controllers/     # Business logic for routes
+    │   ├── models/          # Mongoose Schemas
+    │   ├── routes/          # Express API routes
+    │   ├── middleware/      # JWT Authentication
+    │   ├── server.js        # Main Express server
+    │── frontend/
+    │   ├── src/
+    │   │   ├── components/  # Reusable UI components
+    │   │   ├── pages/       # Route pages
+    │   │   ├── context/     # Authentication context
+    │   │   ├── hooks/       # Custom React hooks
+    │   │   ├── utils/       # Helper functions
+    │   │   ├── App.js       # Main React app
+    │   ├── .env             # Environment variables
+    │   ├── package.json     # Dependencies
+
+  ### 💡 Future Upgrades
+
+  ✅ Real-time Booking Suggestions using Amadeus, Ticketmaster, AviationStack APIs
+  ✅ Flight Tracking Integration
+  ✅ Payment Gateway for direct bookings
+  ✅ Offline Mode with PWA support
+
+  ### 🛠 Contributors & Support
+
+  Developed by CodeTirtho97. If you have any suggestions, feel free to open an issue or contribute!
+
+  ### 📜 License
+
+  This project is licensed under the MIT License. Feel free to use and modify! 🎉
