@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../utils/api";
 import {
-    Box, Typography, Paper, Button, CircularProgress, List, ListItem, ListItemText, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, MenuItem
+    Box, Typography, Paper, Button, CircularProgress, List, ListItem, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, MenuItem
 } from "@mui/material";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
@@ -400,19 +400,41 @@ const ItineraryDetails = () => {
 
             {/* Dialog for "Add Booking" options */}
             <Dialog open={openAddBookingDialog} onClose={() => setOpenAddBookingDialog(false)}>
-                <DialogTitle variant="h5" >➕ Add a Booking</DialogTitle>
+                <DialogTitle variant="h5">➕ Add a Booking</DialogTitle>
                 <DialogContent>
                     <DialogContentText sx={{ fontSize: "1.1rem" }}>
                         Do you already have a booking, or would you like us to suggest options for you?
                     </DialogContentText>
                 </DialogContent>
-                <DialogActions sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <Button variant="outlined" sx={{ borderColor: "#003049", fontWeight: "bold", "&:hover": { backgroundColor: "#669bbc", color: "#fff" } }} onClick={() => navigate(`/bookings/existing/${itineraryId}`)} color="primary">
+                <DialogActions sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    {/* Existing Booking Button */}
+                    <Button 
+                        variant="outlined" 
+                        sx={{ borderColor: "#003049", fontWeight: "bold", "&:hover": { backgroundColor: "#669bbc", color: "#fff" } }} 
+                        onClick={() => navigate(`/bookings/existing/${itineraryId}`)} 
+                        color="primary"
+                    >
                         Enter Existing Booking
                     </Button>
-                    <Button variant="outlined" sx={{ borderColor: "#3c096c", fontWeight: "bold", "&:hover": { backgroundColor: "#957fef", color: "#fff" } }} onClick={() => navigate(`/bookings/new/${itineraryId}`)} color="secondary">
-                        Find a Booking
-                    </Button>
+
+                    {/* Disabled "Find a Booking" Button with Future Upgrade Message */}
+                    <Box textAlign="center">
+                        <Button 
+                            variant="outlined" 
+                            sx={{ 
+                                borderColor: "#3c096c", 
+                                fontWeight: "bold", 
+                                cursor: "not-allowed", 
+                                opacity: 0.6 // Dimmed effect to indicate disabled state
+                            }} 
+                            disabled
+                        >
+                            Find a Booking
+                        </Button>
+                        <Typography variant="caption" sx={{ display: "block", fontSize: "0.65rem", color: "#7c7c7c", mt: 0.5 }}>
+                            (Future Upgrade 🚀)
+                        </Typography>
+                    </Box>
                 </DialogActions>
             </Dialog>
 
