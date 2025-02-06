@@ -77,7 +77,7 @@ RouteGenie is a full-stack MERN (MongoDB, Express, React, Node.js) web applicati
 
   #### 1️⃣ Clone the Repository
 
-    $ git clone https://github.com/CodeTirtho97/routegenie.git
+    $ git clone https://github.com/CodeTirtho97/Route-Genie.git
     $ cd routegenie
 
   #### 2️⃣ Backend Setup
