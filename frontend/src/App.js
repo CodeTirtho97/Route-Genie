@@ -12,6 +12,7 @@ import BookingDetails from "./pages/BookingDetails";
 import ManualBookingForm from "./pages/ManualBookingForm";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ProfileSettings from "./pages/ProfileSettings";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/profile" element={<ProfileSettings />} />
         </Routes>
         <ModernFooter />
       </Router>
