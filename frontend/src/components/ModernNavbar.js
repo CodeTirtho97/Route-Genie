@@ -10,37 +10,78 @@ import {
   List,
   ListItem,
   Avatar,
-  Badge,
   useTheme,
   useMediaQuery,
+  Popover,
+  MenuList,
+  MenuItem,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Paper,
 } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Home as HomeIcon,
   Map as MapIcon,
   BookOnline as BookingsIcon,
   Menu as MenuIcon,
   Close as CloseIcon,
   Logout as LogoutIcon,
-  Notifications as NotificationsIcon,
+  Person as PersonIcon,
+  KeyboardArrowDown as ArrowDownIcon,
+  Dashboard as DashboardIcon,
 } from "@mui/icons-material";
 
 const ModernNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // Load user from localStorage
+  // Load user from localStorage and listen for storage changes
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const loadUser = () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          localStorage.removeItem("user");
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    // Load user initially
+    loadUser();
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = (e) => {
+      if (e.key === "user") {
+        loadUser();
+      }
+    };
+
+    // Listen for custom events (when user logs in/out in same tab)
+    const handleUserChange = () => {
+      loadUser();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("userStateChange", handleUserChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("userStateChange", handleUserChange);
+    };
   }, []);
 
   // Handle scroll effect
@@ -56,19 +97,81 @@ const ModernNavbar = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+
+    // Dispatch custom event to update other components
+    window.dispatchEvent(new Event("userStateChange"));
+
+    // Close dropdown menu
+    setAnchorEl(null);
+
+    // Navigate to home page
     navigate("/");
-    window.location.reload();
+
+    // Close mobile drawer if open
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
+  };
+
+  const handleProfileClick = () => {
+    setAnchorEl(null);
+    navigate("/profile"); // We'll create this page later
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
+  };
+
+  const handleDashboardClick = () => {
+    setAnchorEl(null);
+    navigate("/dashboard"); // We'll create this page later
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
+  };
+
+  const handleSignup = () => {
+    navigate("/signup");
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
   };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const navigationItems = [
-    { label: "Home", icon: HomeIcon, path: "/" },
-    { label: "Itinerary", icon: MapIcon, path: "/itinerary" },
-    { label: "Bookings", icon: BookingsIcon, path: "/bookings" },
-  ];
+  const handleUserMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // Navigation items - different for authenticated vs non-authenticated users
+  const getNavigationItems = () => {
+    if (user) {
+      return [
+        { label: "Dashboard", icon: DashboardIcon, path: "/dashboard" },
+        { label: "Itinerary", icon: MapIcon, path: "/itinerary" },
+        { label: "Bookings", icon: BookingsIcon, path: "/bookings" },
+      ];
+    } else {
+      return [
+        { label: "Itinerary", icon: MapIcon, path: "/itinerary" },
+        { label: "Bookings", icon: BookingsIcon, path: "/bookings" },
+      ];
+    }
+  };
+
+  const navigationItems = getNavigationItems();
 
   const isActivePage = (path) => {
     return location.pathname === path;
@@ -133,82 +236,234 @@ const ModernNavbar = () => {
     >
       {user ? (
         <>
-          {/* Notifications */}
-          <IconButton
-            sx={{
-              color: "#64748b",
-              "&:hover": {
-                background: "rgba(99, 102, 241, 0.1)",
-                color: theme.palette.primary.main,
-              },
-            }}
-          >
-            <Badge badgeContent={2} color="primary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-
-          {/* User Avatar */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              padding: mobile ? "8px 0" : 0,
-            }}
-          >
-            <Avatar
-              sx={{
-                width: 32,
-                height: 32,
-                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-              }}
-            >
-              {user.name?.charAt(0).toUpperCase()}
-            </Avatar>
-            {mobile && (
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: 500, color: "#1e293b" }}
+          {/* User Avatar Button with Dropdown */}
+          {!mobile ? (
+            <Box sx={{ position: "relative" }}>
+              <Button
+                onClick={handleUserMenuClick}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  padding: "6px 12px",
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  color: "#1e293b",
+                  background: "rgba(99, 102, 241, 0.05)",
+                  border: "1px solid rgba(99, 102, 241, 0.1)",
+                  "&:hover": {
+                    background: "rgba(99, 102, 241, 0.1)",
+                    border: "1px solid rgba(99, 102, 241, 0.2)",
+                  },
+                }}
               >
-                {user.name}
-              </Typography>
-            )}
-          </Box>
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    background:
+                      "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  {user.name?.charAt(0).toUpperCase()}
+                </Avatar>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 600, color: "#1e293b" }}
+                >
+                  {user.name?.split(" ")[0]} {/* Show first name only */}
+                </Typography>
+                <ArrowDownIcon sx={{ fontSize: "1rem", color: "#64748b" }} />
+              </Button>
 
-          {/* Logout Button */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              onClick={handleLogout}
-              startIcon={<LogoutIcon />}
-              variant={mobile ? "outlined" : "text"}
-              sx={{
-                color: mobile ? theme.palette.primary.main : "#64748b",
-                fontWeight: 600,
-                fontSize: "0.875rem",
-                padding: mobile ? "10px 20px" : "6px 12px",
-                borderRadius: "8px",
-                textTransform: "none",
-                minWidth: mobile ? "100%" : "auto",
-                borderColor: mobile
-                  ? theme.palette.primary.main
-                  : "transparent",
-                "&:hover": {
-                  background: mobile
-                    ? "rgba(99, 102, 241, 0.1)"
-                    : "rgba(239, 68, 68, 0.1)",
-                  color: mobile ? theme.palette.primary.main : "#ef4444",
-                  borderColor: mobile
-                    ? theme.palette.primary.main
-                    : "transparent",
-                },
-              }}
-            >
-              {mobile ? "Logout" : "Logout"}
-            </Button>
-          </motion.div>
+              {/* Custom Dropdown - Positioned Absolutely */}
+              {Boolean(anchorEl) && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "100%",
+                    right: 0,
+                    zIndex: 9999,
+                    marginTop: "8px",
+                  }}
+                >
+                  <Paper
+                    sx={{
+                      borderRadius: "12px",
+                      border: "1px solid #e2e8f0",
+                      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                      minWidth: "220px",
+                      overflow: "hidden",
+                      background: "#ffffff",
+                    }}
+                  >
+                    {/* User Info Header */}
+                    <Box sx={{ padding: "16px", background: "#f8fafc" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 700, color: "#1e293b" }}
+                      >
+                        {user.name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: "#64748b" }}>
+                        {user.email}
+                      </Typography>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Profile Option */}
+                    <Box
+                      onClick={handleProfileClick}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "12px 16px",
+                        cursor: "pointer",
+                        "&:hover": {
+                          background: "rgba(99, 102, 241, 0.05)",
+                        },
+                      }}
+                    >
+                      <PersonIcon
+                        sx={{
+                          color: "#10b981",
+                          fontSize: "1.2rem",
+                          marginRight: 2,
+                        }}
+                      />
+                      <Typography sx={{ fontWeight: 600, color: "#1e293b" }}>
+                        Profile Settings
+                      </Typography>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Logout Option */}
+                    <Box
+                      onClick={handleLogout}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "12px 16px",
+                        cursor: "pointer",
+                        "&:hover": {
+                          background: "rgba(239, 68, 68, 0.05)",
+                        },
+                      }}
+                    >
+                      <LogoutIcon
+                        sx={{
+                          color: "#ef4444",
+                          fontSize: "1.2rem",
+                          marginRight: 2,
+                        }}
+                      />
+                      <Typography sx={{ fontWeight: 600, color: "#ef4444" }}>
+                        Logout
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Box>
+              )}
+
+              {/* Invisible overlay to close dropdown when clicking outside */}
+              {Boolean(anchorEl) && (
+                <Box
+                  onClick={handleUserMenuClose}
+                  sx={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 9998,
+                  }}
+                />
+              )}
+            </Box>
+          ) : (
+            // Mobile User Section
+            <Box sx={{ width: "100%" }}>
+              {/* User Info */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  padding: "16px",
+                  background: "#f8fafc",
+                  borderRadius: "12px",
+                  marginBottom: 2,
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    background:
+                      "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  {user.name?.charAt(0).toUpperCase()}
+                </Avatar>
+                <Box>
+                  <Typography
+                    variant="body1"
+                    sx={{ fontWeight: 700, color: "#1e293b" }}
+                  >
+                    {user.name}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "#64748b" }}>
+                    {user.email}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Mobile Menu Items */}
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Button
+                  onClick={handleProfileClick}
+                  startIcon={<PersonIcon />}
+                  fullWidth
+                  sx={{
+                    justifyContent: "flex-start",
+                    padding: "12px 16px",
+                    borderRadius: "8px",
+                    color: "#1e293b",
+                    fontWeight: 600,
+                    "&:hover": {
+                      background: "rgba(16, 185, 129, 0.1)",
+                    },
+                  }}
+                >
+                  Profile Settings
+                </Button>
+
+                <Button
+                  onClick={handleLogout}
+                  startIcon={<LogoutIcon />}
+                  fullWidth
+                  sx={{
+                    justifyContent: "flex-start",
+                    padding: "12px 16px",
+                    borderRadius: "8px",
+                    color: "#ef4444",
+                    fontWeight: 600,
+                    "&:hover": {
+                      background: "rgba(239, 68, 68, 0.1)",
+                    },
+                  }}
+                >
+                  Logout
+                </Button>
+              </Box>
+            </Box>
+          )}
         </>
       ) : (
         // Login/Signup buttons for non-authenticated users
@@ -221,8 +476,7 @@ const ModernNavbar = () => {
           }}
         >
           <Button
-            component={Link}
-            to="/login"
+            onClick={handleLogin}
             variant="outlined"
             sx={{
               borderColor: theme.palette.primary.main,
@@ -242,8 +496,7 @@ const ModernNavbar = () => {
             Login
           </Button>
           <Button
-            component={Link}
-            to="/signup"
+            onClick={handleSignup}
             variant="contained"
             sx={{
               background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
@@ -299,7 +552,7 @@ const ModernNavbar = () => {
           >
             <Box
               component={Link}
-              to="/"
+              to={user ? "/dashboard" : "/"} // Different home for logged users
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -392,7 +645,7 @@ const ModernNavbar = () => {
         onClose={handleDrawerToggle}
         PaperProps={{
           sx: {
-            width: 280,
+            width: 320,
             background: "#ffffff",
             borderLeft: "1px solid #e2e8f0",
           },
@@ -409,7 +662,7 @@ const ModernNavbar = () => {
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: 700, color: "#1e293b" }}>
-              Navigation
+              Menu
             </Typography>
             <IconButton
               onClick={handleDrawerToggle}
@@ -426,7 +679,7 @@ const ModernNavbar = () => {
           </Box>
 
           {/* Navigation Items */}
-          <List sx={{ padding: 0 }}>
+          <List sx={{ padding: 0, marginBottom: 3 }}>
             {navigationItems.map((item, index) => (
               <motion.div
                 key={item.path}

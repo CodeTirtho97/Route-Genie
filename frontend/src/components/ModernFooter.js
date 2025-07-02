@@ -14,6 +14,7 @@ import {
   LinkedIn as LinkedInIcon,
   Email as EmailIcon,
   Favorite as HeartIcon,
+  Twitter,
 } from "@mui/icons-material";
 
 const ModernFooter = () => {
@@ -26,8 +27,12 @@ const ModernFooter = () => {
       href: "https://github.com/CodeTirtho97",
       label: "GitHub",
     },
-    { icon: LinkedInIcon, href: "#", label: "LinkedIn" },
-    { icon: EmailIcon, href: "mailto:contact@routegenie.com", label: "Email" },
+    {
+      icon: LinkedInIcon,
+      href: "https://www.linkedin.com/in/tirthoraj-bhattacharya/",
+      label: "LinkedIn",
+    },
+    { icon: Twitter, href: "https://x.com/lucifer_7951", label: "Twitter" },
   ];
 
   return (

@@ -575,7 +575,7 @@ const ModernHome = () => {
             </motion.div>
 
             {/* Login/Signup buttons for non-authenticated users */}
-            {!user && (
+            {/* {!user && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -632,7 +632,7 @@ const ModernHome = () => {
                   </Button>
                 </Box>
               </motion.div>
-            )}
+            )} */}
           </motion.div>
         </Container>
       </Box>
